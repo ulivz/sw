@@ -1,4 +1,4 @@
-console.log('[Service Worker] v7')
+console.log('[Service Worker] v10')
 console.log('[SW] Registration time: ' + new Date().toLocaleTimeString())
 
 const BASE_URL = location.pathname.replace('sw.js', '')
@@ -59,7 +59,7 @@ self.onfetch = event => {
     if (url.pathname === normalizeUrl('ulivz.png')) {
       return event.respondWith(caches.match(normalizeUrl('evan.jpeg')))
     }
-    if (url.pathname === normalizeUrl('ulivz.png')) {
+    if (url.pathname === normalizeUrl('sw.js')) {
       return event.respondWith(fetched)
     }
   }
