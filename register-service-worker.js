@@ -56,7 +56,11 @@ function registerValidSW (swUrl, emit) {
       }
     })
     .catch(error => {
-      emit('error', error)
+      if (!navigator.onLine) {
+        emit('offline')
+      } else {
+        emit('error', error)
+      }
     })
 }
 

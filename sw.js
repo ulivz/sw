@@ -1,4 +1,4 @@
-console.warn('[Service Worker] v2')
+console.warn('[Service Worker] v7')
 
 const CACHE_NAMESPACE = 'ulivz'
 const PRECACHE = CACHE_NAMESPACE + 'precache-v1'
@@ -43,16 +43,21 @@ self.onactivate = (event) => {
 
 self.onfetch = event => {
   const cached = caches.match(event.request)
-  const fixedUrl = `${event.request.url}?${Date.now()}`
-  const fetched = fetch(fixedUrl, { cache: 'no-store' })
+  // const fixedUrl = `${event.request.url}?${Date.now()}`
+  const fetched = fetch(event.request.url, { cache: 'no-store' })
   const fetchedCopy = fetched.then(resp => resp.clone())
   const url = new URL(event.request.url)
 
   console.log(`[SW] Fetch %c ${url.pathname}`, FECTH_FILE_STYLE)
 
-  // Intercept Request
-  if (url.origin === location.origin && url.pathname === '/ulivz.png') {
-    return event.respondWith(caches.match('evan.jpeg'))
+  if (url.origin === location.origin) {
+    // Intercept Request
+    if (url.pathname === '/ulivz.png') {
+      return event.respondWith(caches.match('evan.jpeg'))
+    }
+    if (url.pathname === '/sw.js') {
+      return event.respondWith(fetched)
+    }
   }
 
   // Call respondWith() with whatever we get first.
