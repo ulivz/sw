@@ -1,4 +1,4 @@
-console.log('[Service Worker] v10')
+console.log('[Service Worker] v11')
 console.log('[SW] Registration time: ' + new Date().toLocaleTimeString())
 
 const BASE_URL = location.pathname.replace('sw.js', '')
