@@ -6,7 +6,8 @@ const BASE_URL = location.pathname.replace('sw.js', '')
 const CACHE_NAMESPACE = 'ulivz'
 const PRECACHE = CACHE_NAMESPACE + 'precache-v1'
 const PRECACHE_LIST = [
-  normalizeUrl('offline.html')
+  normalizeUrl('offline.html'),
+  normalizeUrl('evan.jpeg')
 ]
 
 const RUNTIME = CACHE_NAMESPACE + 'runtime-v1'
