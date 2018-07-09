@@ -1,9 +1,12 @@
-console.warn('[Service Worker] v7')
+console.log('[Service Worker] v7')
+console.log('[SW] Registration time: ' + new Date().toLocaleTimeString())
+
+const BASE_URL = location.pathname.replace('sw.js', '')
 
 const CACHE_NAMESPACE = 'ulivz'
 const PRECACHE = CACHE_NAMESPACE + 'precache-v1'
 const PRECACHE_LIST = [
-  './offline.html'
+  normalizeUrl('offline.html')
 ]
 
 const RUNTIME = CACHE_NAMESPACE + 'runtime-v1'
@@ -12,7 +15,7 @@ const expectedCaches = [PRECACHE, RUNTIME]
 const LOG_STYLE = 'background: #f66; color: #ffffff'
 const FECTH_FILE_STYLE = 'background: #222; color: #bada55'
 
-console.log('[SW] precache id: ' + PRECACHE)
+console.log('[SW] Precache ID: ' + PRECACHE)
 
 self.oninstall = (event) => {
   console.log('[SW] %cinstalled', LOG_STYLE)
@@ -52,10 +55,10 @@ self.onfetch = event => {
 
   if (url.origin === location.origin) {
     // Intercept Request
-    if (url.pathname === '/ulivz.png') {
-      return event.respondWith(caches.match('evan.jpeg'))
+    if (url.pathname === normalizeUrl('ulivz.png')) {
+      return event.respondWith(caches.match(normalizeUrl('evan.jpeg')))
     }
-    if (url.pathname === '/sw.js') {
+    if (url.pathname === normalizeUrl('ulivz.png')) {
       return event.respondWith(fetched)
     }
   }
@@ -67,7 +70,7 @@ self.onfetch = event => {
   event.respondWith(
     Promise.race([fetched.catch(_ => cached), cached])
       .then(resp => resp || fetched)
-      .catch(_ => caches.match('offline.html'))
+      .catch(_ => caches.match(normalizeUrl('offline.html')))
   )
 
   event.waitUntil(
@@ -75,4 +78,8 @@ self.onfetch = event => {
       .then(([response, cache]) => response.ok && cache.put(event.request, response))
       .catch(_ => { /* ignore errors */ })
   )
+}
+
+function normalizeUrl (path) {
+  return BASE_URL + path
 }
