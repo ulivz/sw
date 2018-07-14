@@ -4,16 +4,75 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>Service worker POC</title>
-  <style></style>
+  <style>
+    .sw-update-popup {
+      position: fixed;
+      right: 1em;
+      bottom: 1em;
+      padding: 1em;
+      border: 1px solid cadetblue;
+      borde: r-radius 3px;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .sw-update-popup button {
+      margin-top: 0.5em;
+      padding: 0.25em 2em;
+    }
+  </style>
 </head>
 <body>
+
 <div id="app">
   <div id="version"></div>
   <img src="ulivz.png">
 </div>
+<div id="popup" class="sw-update-popup" style="display: none">
+  New content is available.
+  <button id="refresh">Refresh</button>
+</div>
+
 <script src="app.js"></script>
 <script src="register-service-worker.js"></script>
+<script src="SWUpdateEvent.js"></script>
+
 <script>
+  const refreshBtn = document.querySelector('#refresh')
+
+  refreshBtn.addEventListener('click', () => {
+    reload()
+  }, false)
+
+  const PopupModel = {
+    el: document.querySelector('#popup'),
+    swUpdateEvent: null
+  }
+
+  function togglePopup (show) {
+    if (show) {
+      PopupModel.el.style.display = 'block'
+    } else {
+      PopupModel.el.style.display = 'none'
+    }
+  }
+
+  function notifyNewSW (e) {
+    PopupModel.swUpdateEvent = e
+    togglePopup(e)
+  }
+
+  function reload () {
+    if (PopupModel.swUpdateEvent) {
+      PopupModel.swUpdateEvent.skipWaiting().then(() => {
+        location.reload(true)
+      })
+      PopupModel.swUpdateEvent = null
+      togglePopup()
+    }
+  }
+
   const LOG_STYLE = 'background: #4abf8a; color: #ffffff'
   register('./sw.js', {
     ready() {
@@ -22,11 +81,13 @@
     registered() {
       console.log('[SW] %cregistered', LOG_STYLE)
     },
-    updated() {
+    updated(registration) {
       console.log('[SW] %cupdated', LOG_STYLE)
+      notifyNewSW(new SWUpdateEvent(registration))
     },
-    cached() {
+    cached(registration) {
       console.log('[SW] %ccached', LOG_STYLE)
+      notifyNewSW(new SWUpdateEvent(registration))
     },
     offline() {
       console.log('[SW] %coffline', LOG_STYLE)

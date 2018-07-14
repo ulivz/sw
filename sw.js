@@ -1,5 +1,5 @@
-console.log('[Service Worker] v12')
-console.log('[SW] Registration time: ' + new Date().toLocaleTimeString())
+console.log('[Service Worker] v32')
+console.log('[Service Worker] time: ' + new Date().toLocaleTimeString())
 
 const BASE_URL = location.pathname.replace('sw.js', '')
 
@@ -23,7 +23,7 @@ self.oninstall = (event) => {
   event.waitUntil(
     caches.open(PRECACHE)
       .then(cache => cache.addAll(PRECACHE_LIST))
-      .then(self.skipWaiting())
+      // .then(self.skipWaiting())
       .catch(err => console.log(err))
   )
 }
@@ -52,13 +52,15 @@ self.onfetch = event => {
   const fetchedCopy = fetched.then(resp => resp.clone())
   const url = new URL(event.request.url)
 
-  console.log(`[SW] Fetch %c ${url.pathname}`, FECTH_FILE_STYLE)
+  // console.log(`[SW] Fetch %c ${url.pathname}`, FECTH_FILE_STYLE)
 
   if (url.origin === location.origin) {
     // Intercept Request
-    if (url.pathname === normalizeUrl('ulivz.png')) {
-      return event.respondWith(caches.match(normalizeUrl('evan.jpeg')))
-    }
+    // if (url.pathname === normalizeUrl('ulivz.png')) {
+    //   return event.respondWith(caches.match(normalizeUrl('evan.jpeg')))
+    // }
+
+    // Always request the new  sw.js
     if (url.pathname === normalizeUrl('sw.js')) {
       return event.respondWith(fetched)
     }
@@ -84,3 +86,18 @@ self.onfetch = event => {
 function normalizeUrl (path) {
   return BASE_URL + path
 }
+
+addEventListener('message', event => {
+  console.warn('[SW] [Message]')
+  console.log(event)
+  const replyPort = event.ports[0]
+  const message = event.data
+  if (replyPort && message && message.type === 'skip-waiting') {
+    event.waitUntil(
+      self.skipWaiting().then(
+        () => replyPort.postMessage({ error: null }),
+        error => replyPort.postMessage({ error })
+      )
+    )
+  }
+})
